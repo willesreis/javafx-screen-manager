@@ -20,6 +20,7 @@ import javafx.scene.layout.StackPane;
 import javafx.util.Duration;
 
 import org.wsr.screenmanager.interfaces.ScreenController;
+import org.wsr.screenmanager.interfaces.ScreenEnum;
 
 /**
  * Manager to perform screen actions/transitions.
@@ -31,46 +32,49 @@ public class ScreenManager extends StackPane {
 	/**
 	 * Stack of screens to be managed.
 	 */
-	private Map<String, Node> screens = new HashMap<String, Node>();
+	private Map<ScreenEnum, Node> screens = new HashMap<ScreenEnum, Node>();
 	
 	/** 
 	 * Add screen to be managed.
 	 * 
-	 * @param name Screen name.
+	 * @param screenId Screen identification.
 	 * @param node Node to be putted inside pane.
 	 */
-	public void addScreen(String name, Node node) {
-		screens.put(name, node);
+	public void addScreen(ScreenEnum screenId, Node node) {
+		screens.put(screenId, node);
 	}
 	
 	/**
 	 * Define actual screen with fade transition.
 	 * 
-	 * @param name Screen name.
+	 * @param screenId Screen identification.
 	 * @return true to success defined, or false otherwise.
 	 */
-	public boolean setScreen(final String name) {
-		if (screens.get(name) != null) {
+	public boolean setScreen(final ScreenEnum screenId) {
+		if (screens.get(screenId) != null) {
 			final DoubleProperty opacity = opacityProperty();
-			
-			final Timeline fadeIn = new Timeline(
-					new KeyFrame(Duration.ZERO, new KeyValue(opacity, 0.0)),
-					new KeyFrame(new Duration(2000), new KeyValue(opacity, 0.0)));
+
 			if (!getChildren().isEmpty()) {
 				Timeline fade = new Timeline(
 						new KeyFrame(Duration.ZERO, new KeyValue(opacity, 1.0)),
-						new KeyFrame(new Duration(1000), new EventHandler<ActionEvent>() {
+						new KeyFrame(new Duration(2000), new EventHandler<ActionEvent>() {
 							@Override
 							public void handle(ActionEvent event) {
 								getChildren().remove(0);
-								getChildren().add(0, screens.get(name));
+								getChildren().add(0, screens.get(screenId));
+								Timeline fadeIn = new Timeline(
+										new KeyFrame(Duration.ZERO, new KeyValue(opacity, 0.0)),
+										new KeyFrame(new Duration(2000), new KeyValue(opacity, 1.0)));
 								fadeIn.play();
 							}
 						}, new KeyValue(opacity, 0.0)));
 				fade.play();
 			} else {
 				setOpacity(0.0);
-				getChildren().add(screens.get(name));
+				getChildren().add(screens.get(screenId));
+				Timeline fadeIn = new Timeline(
+						new KeyFrame(Duration.ZERO, new KeyValue(opacity, 0.0)),
+						new KeyFrame(new Duration(1000), new KeyValue(opacity, 1.0)));
 				fadeIn.play();
 			}
 			return true;
@@ -83,18 +87,18 @@ public class ScreenManager extends StackPane {
 	/**
 	 * Load screen with your template FXML.
 	 * 
-	 * @param name Screen name.
+	 * @param screenId Screen identification.
 	 * @param clazz Class to get resource.
 	 * @param resource Template name of FXML.
 	 * @return true to success load, or false otherwise.
 	 */
-	public boolean loadScreen(String name, Class<? extends Application> clazz, String resource) {
+	public boolean loadScreen(ScreenEnum screenId, Class<? extends Application> clazz, String resource) {
 		try {
 			FXMLLoader loader = new FXMLLoader(clazz.getResource(resource));
 			Parent screen = (Parent) loader.load();
 			ScreenController controller = loader.getController();
 			controller.setScreenParent(this);
-			addScreen(name, screen);
+			addScreen(screenId, screen);
 			return true;
 		} catch (IOException ioe) {
 			Logger.getLogger(ScreenManager.class.getName()).log(Level.ALL, ioe.getMessage());
@@ -105,11 +109,11 @@ public class ScreenManager extends StackPane {
 	/**
 	 * Remove screen of the stack.
 	 * 
-	 * @param name Screen name.
+	 * @param screenId Screen identification.
 	 * @return true to success remove, or false otherwise.
 	 */
-	public boolean unloadScreen(String name) {
-		if (screens.remove(name) == null) {
+	public boolean unloadScreen(String screenId) {
+		if (screens.remove(screenId) == null) {
 			System.out.println("Screen didn't exist!");
 			return false;
 		} else {

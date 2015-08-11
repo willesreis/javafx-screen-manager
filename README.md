@@ -14,9 +14,10 @@ public class Main extends Application {
 		try {
 			ScreenManager manager = new ScreenManager();
 			// One calling loadScreen for each FXML of the application
-			manager.loadScreen("Screen1 ID", Main.class, "FXML1 filename");
-			manager.loadScreen("Screen2 ID", Main.class, "FXML2 filename");
-			manager.loadScreen("Screen3 ID", Main.class, "FXML3 filename");
+			manager.loadScreen(MyScreenEnum.SCREEN_LOGIN, Main.class, MyScreenEnum.SCREEN_LOGIN.getFXMLName());
+			manager.loadScreen(MyScreenEnum.SCREEN_FORM, Main.class, MyScreenEnum.SCREEN_FORM.getFXMLName());
+			manager.loadScreen(MyScreenEnum.SCREEN_DETAIL, Main.class, MyScreenEnum.SCREEN_DETAIL.getFXMLName());
+			manager.setScreen(MyScreenEnum.SCREEN_LOGIN);
 			Scene scene = new Scene(manager,400,300);
 			stage.setTitle("Welcome");
 			stage.setScene(scene);
