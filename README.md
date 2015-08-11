@@ -1,5 +1,5 @@
 # javafx-screen-manager
-Screen manager to JavaFX application
+Screen manager to JavaFX application. Referenced in [https://github.com/acaicedo/JFX-MultiScreen]
 
 The screens are extended from StackPane and are managed by main application through composition strategy.
 The source can be exported to .jar file and used as lib in JavaFX project.
