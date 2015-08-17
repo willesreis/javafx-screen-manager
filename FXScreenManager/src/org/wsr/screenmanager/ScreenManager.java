@@ -6,11 +6,8 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javafx.animation.KeyFrame;
-import javafx.animation.KeyValue;
-import javafx.animation.Timeline;
+import javafx.animation.FadeTransition;
 import javafx.application.Application;
-import javafx.beans.property.DoubleProperty;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
@@ -52,29 +49,33 @@ public class ScreenManager extends StackPane {
 	 */
 	public boolean setScreen(final ScreenEnum screenId) {
 		if (screens.get(screenId) != null) {
-			final DoubleProperty opacity = opacityProperty();
-
 			if (!getChildren().isEmpty()) {
-				Timeline fade = new Timeline(
-						new KeyFrame(Duration.ZERO, new KeyValue(opacity, 1.0)),
-						new KeyFrame(new Duration(2000), new EventHandler<ActionEvent>() {
+				FadeTransition fadeOut = new FadeTransition(Duration.seconds(1.0));
+				fadeOut.setFromValue(1.0);
+				fadeOut.setToValue(0.0);
+				fadeOut.setNode(getChildren().get(0));
+				getChildren().remove(0);
+				getChildren().add(0, screens.get(screenId));
+				fadeOut.setOnFinished(
+						new EventHandler<ActionEvent>() {
 							@Override
 							public void handle(ActionEvent event) {
+								FadeTransition fadeIn = new FadeTransition(Duration.seconds(1.0));
+								fadeIn.setFromValue(0.0);
+								fadeIn.setToValue(1.0);
+								fadeIn.setNode(getChildren().get(0));
 								getChildren().remove(0);
 								getChildren().add(0, screens.get(screenId));
-								Timeline fadeIn = new Timeline(
-										new KeyFrame(Duration.ZERO, new KeyValue(opacity, 0.0)),
-										new KeyFrame(new Duration(2000), new KeyValue(opacity, 1.0)));
 								fadeIn.play();
 							}
-						}, new KeyValue(opacity, 0.0)));
-				fade.play();
+						});
+				fadeOut.play();
 			} else {
-				setOpacity(0.0);
+				FadeTransition fadeIn = new FadeTransition(Duration.seconds(1.0));
+				fadeIn.setFromValue(0.0);
+				fadeIn.setToValue(1.0);
+				fadeIn.setNode(screens.get(screenId));
 				getChildren().add(screens.get(screenId));
-				Timeline fadeIn = new Timeline(
-						new KeyFrame(Duration.ZERO, new KeyValue(opacity, 0.0)),
-						new KeyFrame(new Duration(1000), new KeyValue(opacity, 1.0)));
 				fadeIn.play();
 			}
 			return true;
@@ -96,7 +97,7 @@ public class ScreenManager extends StackPane {
 		try {
 			FXMLLoader loader = new FXMLLoader(clazz.getResource(resource));
 			Parent screen = (Parent) loader.load();
-			ScreenController controller = loader.getController();
+			ScreenController controller = (ScreenController) loader.getController();
 			controller.setScreenParent(this);
 			addScreen(screenId, screen);
 			return true;
